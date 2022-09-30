@@ -1,7 +1,6 @@
 import ffmpeg
 import subprocess
 import tempfile
-import numpy as np
 
 SAMPLE_RATE = 16000
 
@@ -29,7 +28,7 @@ class ASR():
       file.write(audio)
       file.flush()
       stdout, stderr = subprocess.Popen(
-          ["./whisper", "-m", f"models/ggml-{self.model}.bin", "-f", file.name], 
+          ["./main", "-m", f"models/ggml-{self.model}.bin", "-f", file.name], 
           stdout=subprocess.PIPE
         ).communicate()
       if stderr:
