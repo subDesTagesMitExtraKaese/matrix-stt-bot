@@ -1,4 +1,4 @@
-FROM python:3.9-bullseye
+FROM python:3-bullseye-slim
 WORKDIR /app/
 
 # Install dependencies
@@ -7,23 +7,18 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Whisper
-RUN pip install git+https://github.com/openai/whisper.git
-
-# Install model files
-RUN whisper --model tiny dummy.wav; exit 0
-#RUN whisper --model base dummy.wav; exit 0
-#RUN whisper --model small dummy.wav; exit 0
-#RUN whisper --model medium dummy.wav; exit 0
-#RUN whisper --model large dummy.wav; exit 0
-#RUN whisper --model tiny.en dummy.wav; exit 0
-#RUN whisper --model base.en dummy.wav; exit 0
-#RUN whisper --model small.en dummy.wav; exit 0
-#RUN whisper --model medium.en dummy.wav; exit 0
-
-ADD requirements.txt /app/
+ADD requirements.txt .
 
 RUN pip install -r requirements.txt
+
+# Install Whisper
+ADD whisper.cpp/ .
+RUN cd whisper.cpp && \
+    make tiny && \
+    cp main ../whisper && \
+    cp models/ .. && \
+    cd .. && \
+    rm -rf whisper.cpp/
 
 VOLUME /data/
 

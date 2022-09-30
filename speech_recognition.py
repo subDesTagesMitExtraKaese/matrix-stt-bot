@@ -1,10 +1,11 @@
-import whisper
 import ffmpeg
+import subprocess
+import tempfile
 import numpy as np
 
 SAMPLE_RATE = 16000
 
-def load_audio(data: bytes):
+def convert_audio(data: bytes) -> bytes:
   try:
     # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
     # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
@@ -16,12 +17,21 @@ def load_audio(data: bytes):
   except ffmpeg.Error as e:
     raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
-  return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+  return out
 
 class ASR():
   def __init__(self, model = "tiny"):
-    self.model = whisper.load_model(model)
+    self.model = model
 
-  def transcribe(self, audio: bytes):
-    audio = load_audio(audio)
-    return self.model.transcribe(audio)
+  def transcribe(self, audio: bytes) -> str:
+    audio = convert_audio(audio)
+    with tempfile.NamedTemporaryFile("w+b") as file:
+      file.write(audio)
+      file.flush()
+      stdout, stderr = subprocess.Popen(
+          ["./whisper", "-m", f"models/ggml-{self.model}.bin", "-f", file.name], 
+          stdout=subprocess.PIPE
+        ).communicate()
+      if stderr:
+        print(stderr.decode())
+    return stdout.decode()
