@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  matrix-stt-bot:
+    image: ftcaplan/matrix-stt-bot
+    volumes:
+      - ./data/:/data/
+    environment:
+      - "HOMESERVER=https://matrix.example.com"
+      - "USERNAME=@stt-bot:example.com"
+      - "PASSWORD=<password>"
+      

@@ -1,0 +1,2 @@
+simplematrixbotlib==2.7.0
+matrix-nio[e2e]==0.19
