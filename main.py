@@ -39,7 +39,7 @@ async def on_audio_message(room, event):
     await bot.async_client.room_typing(room.machine_name, False)
     await bot.api.send_text_message(
       room_id=room.room_id,
-      message=f"Transcription of {response.filename}: {result['text']}",
+      message=f"Transcription of {response.filename}: {result}",
       msgtype="m.notice")
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ FROM alpine
 WORKDIR /app/
 
 # Install dependencies
-RUN apk add ffmpeg py3-olm py3-matrix-nio py3-pip py3-pillow
+RUN apk add ffmpeg py3-olm py3-matrix-nio py3-pip py3-pillow gcompat
 
 ADD requirements.txt .
 

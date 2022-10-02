@@ -10,7 +10,7 @@ def convert_audio(data: bytes) -> bytes:
     # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
     out, _ = (
       ffmpeg.input("pipe:", threads=0)
-      .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
+      .output("-", format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
       .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=data)
     )
   except ffmpeg.Error as e:
