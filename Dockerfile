@@ -13,15 +13,20 @@ RUN gcc -pthread -O3 -march=native -c ggml.c && \
     g++ -pthread -o main ggml.o main.o
 
 # main image
-FROM alpine
+FROM python:3.9-slim-bullseye
 WORKDIR /app/
 
 # Install dependencies
-RUN apk add ffmpeg py3-olm py3-matrix-nio py3-pip py3-pillow gcompat wget
+RUN apt-get update && apt-get install -y \
+    ffmpeg libolm-dev gcc make wget\
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 ADD requirements.txt .
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt && \
+  apt-get remove -y gcc make && \
+  apt-get autoremove -y
 
 COPY --from=builder /build/main /app/
 
