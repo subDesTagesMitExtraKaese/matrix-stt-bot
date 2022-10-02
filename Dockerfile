@@ -29,6 +29,6 @@ COPY --from=builder /build/models/ /app/models/
 
 VOLUME /data/
 
-ADD . /app/
+ADD ./*.py /app/
 
 CMD ["python3", "-u", "main.py"]

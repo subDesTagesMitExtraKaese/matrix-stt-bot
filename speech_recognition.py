@@ -1,6 +1,7 @@
 import ffmpeg
 import subprocess
-import tempfile
+from itertools import takewhile
+import os
 
 SAMPLE_RATE = 16000
 
@@ -10,7 +11,7 @@ def convert_audio(data: bytes) -> bytes:
     # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
     out, _ = (
       ffmpeg.input("pipe:", threads=0)
-      .output("-", format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
+      .output("audio.wav", format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
       .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=data)
     )
   except ffmpeg.Error as e:
@@ -23,14 +24,18 @@ class ASR():
     self.model = model
 
   def transcribe(self, audio: bytes) -> str:
-    audio = convert_audio(audio)
-    with tempfile.NamedTemporaryFile("w+b") as file:
-      file.write(audio)
-      file.flush()
-      stdout, stderr = subprocess.Popen(
-          ["./main", "-m", f"models/ggml-{self.model}.bin", "-f", file.name], 
-          stdout=subprocess.PIPE
-        ).communicate()
-      if stderr:
-        print(stderr.decode())
-    return stdout.decode()
+    convert_audio(audio)
+    stdout, stderr = subprocess.Popen(
+        ["./main", "-m", f"models/ggml-{self.model}.bin", "-f", "audio.wav", "--no_timestamps"], 
+        stdout=subprocess.PIPE
+      ).communicate()
+
+    os.remove("audio.wav")
+
+    if stderr:
+      print(stderr.decode())
+
+    lines = stdout.decode().splitlines()[23:]
+    print('\n'.join(lines))
+    text = takewhile(lambda x: x, lines)
+    return '\n'.join(text)

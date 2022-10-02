@@ -37,10 +37,16 @@ async def on_audio_message(room, event):
     result = asr.transcribe(response.body)
 
     await bot.async_client.room_typing(room.machine_name, False)
-    await bot.api.send_text_message(
-      room_id=room.room_id,
-      message=f"Transcription of {response.filename}: {result}",
-      msgtype="m.notice")
+    if response.filename:
+      await bot.api.send_text_message(
+        room_id=room.room_id,
+        message=f"Transcription of {response.filename}: {result}",
+        msgtype="m.notice")
+    else:
+      await bot.api.send_text_message(
+        room_id=room.room_id,
+        message=f"Transcription: {result}",
+        msgtype="m.notice")
 
 if __name__ == "__main__":
   bot.run()
