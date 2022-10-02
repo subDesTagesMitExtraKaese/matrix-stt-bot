@@ -26,7 +26,8 @@ class ASR():
     if model not in MODELS:
       raise ValueError(f"Invalid model: {model}. Must be one of {MODELS}")
     self.model = model
-    os.mkdir("/data/models")
+    if not os.path.exists("/data/models"):
+      os.mkdir("/data/models")
     self.model_path = f"/data/models/ggml-{model}.bin"
     self.model_url = f"https://ggml.ggerganov.com/ggml-model-whisper-{self.model}.bin"
 
