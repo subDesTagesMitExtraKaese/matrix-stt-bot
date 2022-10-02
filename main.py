@@ -49,4 +49,5 @@ async def on_audio_message(room, event):
         msgtype="m.notice")
 
 if __name__ == "__main__":
+  asr.load_model()
   bot.run()

@@ -9,4 +9,5 @@ services:
       - "HOMESERVER=https://matrix.example.com"
       - "USERNAME=@stt-bot:example.com"
       - "PASSWORD=<password>"
+      - "ASR_MODEL=tiny"
       

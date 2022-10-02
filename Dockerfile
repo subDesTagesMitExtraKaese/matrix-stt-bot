@@ -10,22 +10,20 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 ADD whisper.cpp/ /build/
 RUN gcc -pthread -O3 -march=native -c ggml.c && \
     g++ -pthread -O3 -std=c++11 -c main.cpp && \
-    g++ -pthread -o main ggml.o main.o && \
-    ./download-ggml-model.sh tiny
+    g++ -pthread -o main ggml.o main.o
 
 # main image
 FROM alpine
 WORKDIR /app/
 
 # Install dependencies
-RUN apk add ffmpeg py3-olm py3-matrix-nio py3-pip py3-pillow gcompat
+RUN apk add ffmpeg py3-olm py3-matrix-nio py3-pip py3-pillow gcompat wget
 
 ADD requirements.txt .
 
 RUN pip install -r requirements.txt
 
 COPY --from=builder /build/main /app/
-COPY --from=builder /build/models/ /app/models/
 
 VOLUME /data/
 
