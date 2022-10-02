@@ -1,32 +1,37 @@
-FROM python:3.9-bullseye
+# build image
+FROM debian:bullseye-slim AS builder
+WORKDIR /build/
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    make gcc g++ wget \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install Whisper.cpp
+ADD whisper.cpp/ /build/
+RUN gcc -pthread -O3 -march=native -c ggml.c && \
+    g++ -pthread -O3 -std=c++11 -c main.cpp && \
+    g++ -pthread -o main ggml.o main.o
+
+# main image
+FROM python:3.9-slim-bullseye
 WORKDIR /app/
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    ffmpeg libolm-dev \
+    ffmpeg libolm-dev gcc make wget\
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Whisper
-RUN pip install git+https://github.com/openai/whisper.git
+ADD requirements.txt .
 
-# Install model files
-RUN whisper --model tiny dummy.wav; exit 0
-#RUN whisper --model base dummy.wav; exit 0
-#RUN whisper --model small dummy.wav; exit 0
-#RUN whisper --model medium dummy.wav; exit 0
-#RUN whisper --model large dummy.wav; exit 0
-#RUN whisper --model tiny.en dummy.wav; exit 0
-#RUN whisper --model base.en dummy.wav; exit 0
-#RUN whisper --model small.en dummy.wav; exit 0
-#RUN whisper --model medium.en dummy.wav; exit 0
+RUN pip install -r requirements.txt && \
+  apt-get remove -y gcc make && \
+  apt-get autoremove -y
 
-ADD requirements.txt /app/
-
-RUN pip install -r requirements.txt
+COPY --from=builder /build/main /app/
 
 VOLUME /data/
 
-ADD . /app/
+ADD ./*.py /app/
 
-CMD ["python", "-u", "main.py"]
+CMD ["python3", "-u", "main.py"]

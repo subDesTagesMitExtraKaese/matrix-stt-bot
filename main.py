@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 from urllib.parse import urlparse
-import tempfile
 import os
 
-import whisper
 import simplematrixbotlib as botlib
 import nio
 
-model = whisper.load_model("tiny")
+from speech_recognition import ASR
 
 creds = botlib.Creds(
   homeserver=os.environ['HOMESERVER'],
@@ -25,6 +23,8 @@ config.ignore_unverified_devices = True
 config.store_path = '/data/crypto_store/'
 bot = botlib.Bot(creds, config)
 
+asr = ASR(os.getenv('ASR_MODEL', 'tiny'))
+
 @bot.listener.on_custom_event(nio.RoomMessageAudio)
 async def on_audio_message(room, event):
   print(room.machine_name, event.sender, event.body, event.url)
@@ -34,15 +34,20 @@ async def on_audio_message(room, event):
     url = urlparse(event.url)
     response = await bot.async_client.download(server_name=url.netloc, media_id=url.path[1:])
     print(response)
-    with tempfile.NamedTemporaryFile("w+b") as file:
-      file.write(response.body)
-      file.flush()
-      result = model.transcribe(file.name)
+    result = asr.transcribe(response.body)
 
     await bot.async_client.room_typing(room.machine_name, False)
-    await bot.api.send_text_message(
-      room_id=room.room_id,
-      message=f"Transcription of {response.filename}: {result['text']}",
-      msgtype="m.notice")
+    if response.filename:
+      await bot.api.send_text_message(
+        room_id=room.room_id,
+        message=f"Transcription of {response.filename}: {result}",
+        msgtype="m.notice")
+    else:
+      await bot.api.send_text_message(
+        room_id=room.room_id,
+        message=f"Transcription: {result}",
+        msgtype="m.notice")
 
-bot.run()
+if __name__ == "__main__":
+  asr.load_model()
+  bot.run()
