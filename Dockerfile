@@ -8,9 +8,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 # Install Whisper.cpp
 ADD whisper.cpp/ /build/
-RUN gcc -pthread -O3 -march=native -c ggml.c && \
-    g++ -pthread -O3 -std=c++11 -c main.cpp && \
-    g++ -pthread -o main ggml.o main.o
+RUN make
 
 # main image
 FROM python:3.9-slim-bullseye

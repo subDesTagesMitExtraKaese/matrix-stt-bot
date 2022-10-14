@@ -18,8 +18,8 @@ creds = botlib.Creds(
 
 config = botlib.Config()
 config.encryption_enabled = True
-config.emoji_verify = True
-config.ignore_unverified_devices = True
+config.emoji_verify = False
+config.ignore_unverified_devices = False
 config.store_path = '/data/crypto_store/'
 bot = botlib.Bot(creds, config)
 
@@ -34,7 +34,7 @@ async def on_audio_message(room, event):
     url = urlparse(event.url)
     response = await bot.async_client.download(server_name=url.netloc, media_id=url.path[1:])
     print(response)
-    result = asr.transcribe(response.body)
+    result = await asr.transcribe(response.body)
 
     await bot.async_client.room_typing(room.machine_name, False)
     if response.filename:

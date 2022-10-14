@@ -1,6 +1,6 @@
 import ffmpeg
+import asyncio
 import subprocess
-from itertools import takewhile
 import os
 
 SAMPLE_RATE = 16000
@@ -37,19 +37,21 @@ class ASR():
       subprocess.run(["wget", self.model_url, "-O", self.model_path], check=True)
       print("Done.")
 
-  def transcribe(self, audio: bytes) -> str:
+  async def transcribe(self, audio: bytes) -> str:
     convert_audio(audio)
-    stdout, stderr = subprocess.Popen(
-        ["./main", "-m", self.model_path, "-f", "audio.wav", "--no_timestamps"], 
-        stdout=subprocess.PIPE
-      ).communicate()
+    proc = await asyncio.create_subprocess_exec(
+        "./main", "-m", self.model_path, "-f", "audio.wav", "--no_timestamps", 
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+      )
+    stdout, stderr = await proc.communicate()
 
     os.remove("audio.wav")
 
     if stderr:
       print(stderr.decode())
+      
+    text = stdout.decode()
+    print(text)
 
-    lines = stdout.decode().splitlines()[23:]
-    print('\n'.join(lines))
-    text = takewhile(lambda x: x, lines)
-    return '\n'.join(text)
+    return text
