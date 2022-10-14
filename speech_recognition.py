@@ -30,6 +30,7 @@ class ASR():
       os.mkdir("/data/models")
     self.model_path = f"/data/models/ggml-{model}.bin"
     self.model_url = f"https://ggml.ggerganov.com/ggml-model-whisper-{self.model}.bin"
+    self.lock = asyncio.Lock()
 
   def load_model(self):
     if not os.path.exists(self.model_path):
@@ -38,20 +39,21 @@ class ASR():
       print("Done.")
 
   async def transcribe(self, audio: bytes) -> str:
-    convert_audio(audio)
-    proc = await asyncio.create_subprocess_exec(
-        "./main", "-m", self.model_path, "-f", "audio.wav", "--no_timestamps", 
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-      )
-    stdout, stderr = await proc.communicate()
+    async with self.lock:
+      convert_audio(audio)
+      proc = await asyncio.create_subprocess_exec(
+          "./main", "-m", self.model_path, "-f", "audio.wav", "--no_timestamps", 
+          stdout=asyncio.subprocess.PIPE,
+          stderr=asyncio.subprocess.PIPE
+        )
+      stdout, stderr = await proc.communicate()
 
-    os.remove("audio.wav")
+      os.remove("audio.wav")
 
-    if stderr:
-      print(stderr.decode())
-      
-    text = stdout.decode()
-    print(text)
+      if stderr:
+        print(stderr.decode())
+        
+      text = stdout.decode()
+      print(text)
 
-    return text
+      return text
