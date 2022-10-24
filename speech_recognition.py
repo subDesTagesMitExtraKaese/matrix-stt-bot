@@ -1,3 +1,4 @@
+import tempfile
 import ffmpeg
 import asyncio
 import subprocess
@@ -5,15 +6,19 @@ import os
 
 SAMPLE_RATE = 16000
 
-def convert_audio(data: bytes) -> bytes:
+def convert_audio(data: bytes, out_filename: str):
   try:
-    # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
-    # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
-    out, _ = (
-      ffmpeg.input("pipe:", threads=0)
-      .output("audio.wav", format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
-      .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=data)
-    )
+    with tempfile.NamedTemporaryFile("w+b") as file:
+      file.write(data)
+      file.flush()
+      print(f"Converting media {file.name} to {out_filename}")
+
+      out, _ = (
+        ffmpeg.input(file.name, threads=0)
+        .output(out_filename, format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
+        .overwrite_output()
+        .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=data)
+      )
   except ffmpeg.Error as e:
     raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
@@ -41,25 +46,26 @@ class ASR():
       print("Done.")
 
   async def transcribe(self, audio: bytes) -> str:
+    filename = tempfile.mktemp(suffix=".wav")
+    convert_audio(audio, filename)
     async with self.lock:
-      convert_audio(audio)
       proc = await asyncio.create_subprocess_exec(
           "./main",
           "-m", self.model_path,
           "-l", self.language,
-          "-f", "audio.wav",
+          "-f", filename,
           "--no_timestamps", 
           stdout=asyncio.subprocess.PIPE,
           stderr=asyncio.subprocess.PIPE
         )
       stdout, stderr = await proc.communicate()
 
-      os.remove("audio.wav")
+      os.remove(filename)
 
-      if stderr:
-        print(stderr.decode())
-        
-      text = stdout.decode()
-      print(text)
+    if stderr:
+      print(stderr.decode())
+      
+    text = stdout.decode().strip()
+    print(text)
 
-      return text
+    return text

@@ -25,15 +25,16 @@ bot = botlib.Bot(creds, config)
 
 asr = ASR(os.getenv('ASR_MODEL', 'tiny'), os.getenv('ASR_LANGUAGE', 'en'))
 
-@bot.listener.on_custom_event(nio.RoomMessageAudio)
-async def on_message_audio(room, event):
-  await on_audio(room, event, False)
+@bot.listener.on_custom_event(nio.RoomMessage)
+async def on_message(room, event):
+  if not isinstance(event, (nio.RoomMessageAudio,
+                            nio.RoomEncryptedAudio,
+                            nio.RoomMessageVideo,
+                            nio.RoomEncryptedVideo)):
+    return
 
-@bot.listener.on_custom_event(nio.RoomEncryptedAudio)
-async def on_encrypted_audio(room, event):
-  await on_audio(room, event, True)
+  encrypted = isinstance(event, (nio.RoomEncryptedAudio, nio.RoomEncryptedVideo))
 
-async def on_audio(room, event, encrypted):
   print(room.machine_name, event.sender, event.body, event.url)
   match = botlib.MessageMatch(room, event, bot)
   if match.is_not_from_this_bot():
@@ -56,6 +57,11 @@ async def on_audio(room, event, encrypted):
     result = await asr.transcribe(data)
 
     await bot.async_client.room_typing(room.machine_name, False)
+
+    if not result:
+      print("No result")
+      return
+
     filename = response.filename or event.body
     if filename:
       reply = f"Transcription of {filename}: {result}"
@@ -63,7 +69,7 @@ async def on_audio(room, event, encrypted):
       reply = f"Transcription: {result}"
 
     await bot.api._send_room(
-        room_id=room.room_id,
+      room_id=room.room_id,
       content={
         "msgtype": "m.notice",
         "body": reply,
