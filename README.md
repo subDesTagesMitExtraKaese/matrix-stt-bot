@@ -23,7 +23,7 @@ services:
       - "USERNAME=@stt-bot:example.com"
       - "PASSWORD=<password>"
       - "ASR_MODEL=tiny"
-      - "ASR_LANGUAGE=en"
+      - "XDG_CACHE_HOME=/data/cache"
 ```
 
 ## Configuration

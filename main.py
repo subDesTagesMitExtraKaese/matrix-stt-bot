@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import tempfile
 from urllib.parse import urlparse
 import os
 
 import simplematrixbotlib as botlib
 import nio
 
-from speech_recognition import ASR
+import whisper
 
 creds = botlib.Creds(
   homeserver=os.environ['HOMESERVER'],
@@ -23,7 +24,7 @@ config.ignore_unverified_devices = True
 config.store_path = '/data/crypto_store/'
 bot = botlib.Bot(creds, config)
 
-asr = ASR(os.getenv('ASR_MODEL', 'tiny'), os.getenv('ASR_LANGUAGE', 'en'))
+model = whisper.load_model(os.getenv('ASR_MODEL', 'tiny'))
 
 @bot.listener.on_custom_event(nio.RoomMessage)
 async def on_message(room, event):
@@ -54,8 +55,12 @@ async def on_message(room, event):
       data = response.body
 
     print(response)
-    result = await asr.transcribe(data)
 
+    with tempfile.NamedTemporaryFile("w+b") as file:
+      file.write(data)
+      file.flush()
+      print(file.name)
+      result = model.transcribe(file.name)['text']
     await bot.async_client.room_typing(room.machine_name, False)
 
     if not result:
@@ -81,5 +86,4 @@ async def on_message(room, event):
       })
 
 if __name__ == "__main__":
-  asr.load_model()
   bot.run()
