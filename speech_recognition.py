@@ -13,12 +13,15 @@ def convert_audio(data: bytes, out_filename: str):
       file.flush()
       print(f"Converting media {file.name} to {out_filename}")
 
-      out, _ = (
+      out, err = (
         ffmpeg.input(file.name, threads=0)
         .output(out_filename, format="wav", acodec="pcm_s16le", ac=1, ar=SAMPLE_RATE)
         .overwrite_output()
         .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=data)
       )
+    if os.path.getsize(out_filename) == 0:
+      print(str(err, "utf-8"))
+      raise Exception("Converted file is empty")
   except ffmpeg.Error as e:
     raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
