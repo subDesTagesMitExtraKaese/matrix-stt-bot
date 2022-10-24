@@ -40,6 +40,7 @@ async def on_audio(room, event, encrypted):
     await bot.async_client.room_typing(room.machine_name, True, timeout=120000)
     url = urlparse(event.url)
     response = await bot.async_client.download(server_name=url.netloc, media_id=url.path[1:])
+
     if encrypted:
       print("decrypting...")
       data = nio.crypto.attachments.decrypt_attachment(
@@ -50,20 +51,28 @@ async def on_audio(room, event, encrypted):
       )
     else:
       data = response.body
+
     print(response)
     result = await asr.transcribe(data)
 
     await bot.async_client.room_typing(room.machine_name, False)
-    if response.filename:
-      await bot.api.send_text_message(
-        room_id=room.room_id,
-        message=f"Transcription of {response.filename}: {result}",
-        msgtype="m.notice")
+    filename = response.filename or event.body
+    if filename:
+      reply = f"Transcription of {filename}: {result}"
     else:
-      await bot.api.send_text_message(
+      reply = f"Transcription: {result}"
+
+    await bot.api._send_room(
         room_id=room.room_id,
-        message=f"Transcription: {result}",
-        msgtype="m.notice")
+      content={
+        "msgtype": "m.notice",
+        "body": reply,
+        "m.relates_to": {
+          "m.in_reply_to": {
+            "event_id": event.event_id
+          }
+        }
+      })
 
 if __name__ == "__main__":
   asr.load_model()
