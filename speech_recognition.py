@@ -22,10 +22,12 @@ def convert_audio(data: bytes) -> bytes:
 MODELS = ["tiny.en", "tiny", "base.en", "base", "small.en", "small", "medium.en", "medium", "large"]
 
 class ASR():
-  def __init__(self, model = "tiny"):
+  def __init__(self, model = "tiny", language = "en"):
     if model not in MODELS:
       raise ValueError(f"Invalid model: {model}. Must be one of {MODELS}")
     self.model = model
+    self.language = language
+
     if not os.path.exists("/data/models"):
       os.mkdir("/data/models")
     self.model_path = f"/data/models/ggml-{model}.bin"
@@ -42,7 +44,11 @@ class ASR():
     async with self.lock:
       convert_audio(audio)
       proc = await asyncio.create_subprocess_exec(
-          "./main", "-m", self.model_path, "-f", "audio.wav", "--no_timestamps", 
+          "./main",
+          "-m", self.model_path,
+          "-l", self.language,
+          "-f", "audio.wav",
+          "--no_timestamps", 
           stdout=asyncio.subprocess.PIPE,
           stderr=asyncio.subprocess.PIPE
         )

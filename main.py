@@ -23,7 +23,7 @@ config.ignore_unverified_devices = True
 config.store_path = '/data/crypto_store/'
 bot = botlib.Bot(creds, config)
 
-asr = ASR(os.getenv('ASR_MODEL', 'tiny'))
+asr = ASR(os.getenv('ASR_MODEL', 'tiny'), os.getenv('ASR_LANGUAGE', 'en'))
 
 @bot.listener.on_custom_event(nio.RoomMessageAudio)
 async def on_message_audio(room, event):
