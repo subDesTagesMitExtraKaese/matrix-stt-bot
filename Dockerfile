@@ -32,4 +32,8 @@ VOLUME /data/
 
 ADD ./*.py /app/
 
+ARG PRELOAD_MODEL
+ENV PRELOAD_MODEL ${PRELOAD_MODEL}
+RUN if [ -n "$PRELOAD_MODEL" ]; then wget "https://ggml.ggerganov.com/ggml-model-whisper-$PRELOAD_MODEL.bin"; fi
+
 CMD ["python3", "-u", "main.py"]

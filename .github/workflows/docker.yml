@@ -35,3 +35,43 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ftcaplan/matrix-stt-bot:latest
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ftcaplan/matrix-stt-bot:tiny
+          build-args: |
+            "PRELOAD_MODEL=tiny"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ftcaplan/matrix-stt-bot:small
+          build-args: |
+            "PRELOAD_MODEL=small"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ftcaplan/matrix-stt-bot:medium
+          build-args: |
+            "PRELOAD_MODEL=medium"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ftcaplan/matrix-stt-bot:large
+          build-args: |
+            "PRELOAD_MODEL=large"
