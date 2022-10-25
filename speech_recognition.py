@@ -3,7 +3,6 @@ import ffmpeg
 import asyncio
 import subprocess
 import os
-import shutil
 
 SAMPLE_RATE = 16000
 
@@ -37,19 +36,20 @@ class ASR():
     self.model = model
     self.language = language
 
-    if not os.path.exists("/data/models"):
-      os.mkdir("/data/models")
-    self.model_path = f"/data/models/ggml-{model}.bin"
+    if os.path.exists(f"/app/ggml-model-whisper-{model}.bin"):
+      self.model_path = f"/app/ggml-model-whisper-{model}.bin"
+    else:
+      self.model_path = f"/data/models/ggml-{model}.bin"
+      if not os.path.exists("/data/models"):
+        os.mkdir("/data/models")
+        
     self.model_url = f"https://ggml.ggerganov.com/ggml-model-whisper-{self.model}.bin"
     self.lock = asyncio.Lock()
 
   def load_model(self):
     if not os.path.exists(self.model_path) or os.path.getsize(self.model_path) == 0:
-      print("Fetching model...")
-      if os.path.exists(f"ggml-model-whisper-{self.model}.bin"):
-        shutil.copy(f"ggml-model-whisper-{self.model}.bin", self.model_path)
-      else:
-        subprocess.run(["wget", self.model_url, "-O", self.model_path], check=True)
+      print("Downloading model...")
+      subprocess.run(["wget", self.model_url, "-O", self.model_path], check=True)
       print("Done.")
 
   async def transcribe(self, audio: bytes) -> str:
