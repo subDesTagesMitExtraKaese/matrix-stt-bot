@@ -43,7 +43,7 @@ class ASR():
       if not os.path.exists("/data/models"):
         os.mkdir("/data/models")
         
-    self.model_url = f"https://ggml.ggerganov.com/ggml-model-whisper-{self.model}.bin"
+    self.model_url = f"https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-{self.model}.bin"
     self.lock = asyncio.Lock()
 
   def load_model(self):
