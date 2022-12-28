@@ -60,8 +60,7 @@ class ASR():
           "./main",
           "-m", self.model_path,
           "-l", self.language,
-          "-f", filename,
-          "--no_timestamps", 
+          "-f", filename, 
           stdout=asyncio.subprocess.PIPE,
           stderr=asyncio.subprocess.PIPE
         )
