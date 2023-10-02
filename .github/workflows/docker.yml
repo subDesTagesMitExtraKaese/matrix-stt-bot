@@ -52,9 +52,29 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
+          tags: ftcaplan/matrix-stt-bot:tiny-q5_1
+          build-args: |
+            "PRELOAD_MODEL=tiny-q5_1"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
           tags: ftcaplan/matrix-stt-bot:base
           build-args: |
             "PRELOAD_MODEL=base"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ftcaplan/matrix-stt-bot:base-q5_1
+          build-args: |
+            "PRELOAD_MODEL=base-q5_1"
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -72,9 +92,9 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ftcaplan/matrix-stt-bot:medium
+          tags: ftcaplan/matrix-stt-bot:small-q5_1
           build-args: |
-            "PRELOAD_MODEL=medium"
+            "PRELOAD_MODEL=small-q5_1"
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -82,6 +102,16 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ftcaplan/matrix-stt-bot:large
+          tags: ftcaplan/matrix-stt-bot:medium-q5_0
           build-args: |
-            "PRELOAD_MODEL=large"
+            "PRELOAD_MODEL=medium-q5_0"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ftcaplan/matrix-stt-bot:large-q5_0
+          build-args: |
+            "PRELOAD_MODEL=large-q5_0"

@@ -27,7 +27,23 @@ def convert_audio(data: bytes, out_filename: str):
 
   return out
 
-MODELS = ["tiny.en", "tiny", "base.en", "base", "small.en", "small", "medium.en", "medium", "large"]
+MODELS = [
+  "tiny.en", 
+  "tiny.en-q5_1", 
+  "tiny", 
+  "tiny-q5_1", 
+  "base.en", 
+  "base.en-q5_1", 
+  "base", 
+  "base-q5_1", 
+  "small.en", 
+  "small.en-q5_1", 
+  "small", 
+  "small-q5_1",
+  "medium.en-q5_0", 
+  "medium-q5_0", 
+  "large-q5_0"
+]
 
 class ASR():
   def __init__(self, model = "tiny", language = "en"):
@@ -43,7 +59,7 @@ class ASR():
       if not os.path.exists("/data/models"):
         os.mkdir("/data/models")
         
-    self.model_url = f"https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-{self.model}.bin"
+    self.model_url = f"https://ggml.ggerganov.com/ggml-model-whisper-{self.model}.bin"
     self.lock = asyncio.Lock()
 
   def load_model(self):
