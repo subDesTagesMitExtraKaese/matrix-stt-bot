@@ -65,7 +65,7 @@ class ASR():
   def load_model(self):
     if not os.path.exists(self.model_path) or os.path.getsize(self.model_path) == 0:
       print("Downloading model...")
-      subprocess.run(["wget", self.model_url, "-O", self.model_path], check=True)
+      subprocess.run(["wget", "-nv", self.model_url, "-O", self.model_path], check=True)
       print("Done.")
 
   async def transcribe(self, audio: bytes) -> str:
