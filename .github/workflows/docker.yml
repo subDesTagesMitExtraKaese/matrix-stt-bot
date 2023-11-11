@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -37,7 +37,7 @@ jobs:
           tags: ftcaplan/matrix-stt-bot:latest
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -47,7 +47,7 @@ jobs:
             "PRELOAD_MODEL=tiny"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -57,7 +57,7 @@ jobs:
             "PRELOAD_MODEL=tiny-q5_1"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -67,7 +67,7 @@ jobs:
             "PRELOAD_MODEL=base"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -77,7 +77,7 @@ jobs:
             "PRELOAD_MODEL=base-q5_1"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -87,7 +87,7 @@ jobs:
             "PRELOAD_MODEL=small"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -97,7 +97,7 @@ jobs:
             "PRELOAD_MODEL=small-q5_1"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
@@ -107,7 +107,7 @@ jobs:
             "PRELOAD_MODEL=medium-q5_0"
       -
         name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
