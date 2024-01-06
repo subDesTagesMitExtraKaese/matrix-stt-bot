@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from urllib.parse import urlparse
 import os
+import time
+import asyncio
 
 import simplematrixbotlib as botlib
 import nio
@@ -82,4 +84,9 @@ async def on_message(room, event):
 
 if __name__ == "__main__":
   asr.load_model()
-  bot.run()
+  try:
+    bot.run()
+  except asyncio.exceptions.TimeoutError as e:
+    print(e)
+    print("Timeout, restarting...")
+    time.sleep(5)
