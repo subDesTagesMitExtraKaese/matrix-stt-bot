@@ -23,6 +23,9 @@ config.encryption_enabled = True
 config.emoji_verify = False
 config.ignore_unverified_devices = True
 config.store_path = '/data/crypto_store/'
+if 'ALLOWLIST' in os.environ:
+  config.allowlist = os.environ['ALLOWLIST'].split(',')
+
 bot = botlib.Bot(creds, config)
 
 asr = ASR(os.getenv('ASR_MODEL', os.getenv('PRELOAD_MODEL', 'tiny')), os.getenv('ASR_LANGUAGE', 'en'))
