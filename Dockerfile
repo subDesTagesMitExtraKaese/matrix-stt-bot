@@ -11,7 +11,7 @@ ADD whisper.cpp/ /build/
 RUN make
 
 # main image
-FROM python:3.12-slim-bullseye
+FROM python:3.13-slim-bullseye
 WORKDIR /app/
 
 # Install dependencies
