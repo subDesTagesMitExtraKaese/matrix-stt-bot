@@ -1,14 +1,14 @@
 # build image
-FROM debian:bullseye-slim AS builder
-WORKDIR /build/
-RUN apt-get update && apt-get install --no-install-recommends -y \
-    make gcc g++ wget \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+FROM ubuntu:22.04 AS builder
+WORKDIR /app/
+
+RUN apt-get update && \
+  apt-get install -y build-essential wget cmake git \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Install Whisper.cpp
-ADD whisper.cpp/ /build/
-RUN make
+ADD whisper.cpp/ /app/
+RUN cmake -B build && cmake --build build --config Release
 
 # main image
 FROM python:3.12-slim-bullseye
@@ -18,7 +18,7 @@ WORKDIR /app/
 RUN apt-get update && apt-get install -y \
     ffmpeg libolm-dev gcc make wget\
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 ADD requirements.txt .
 
@@ -26,7 +26,7 @@ RUN pip install -r requirements.txt && \
   apt-get remove -y gcc make && \
   apt-get autoremove -y
 
-COPY --from=builder /build/main /app/
+COPY --from=builder /app/build/bin/whisper-cli /app/
 
 VOLUME /data/
 

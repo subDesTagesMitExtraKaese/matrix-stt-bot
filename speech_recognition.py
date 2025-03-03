@@ -88,7 +88,7 @@ class ASR():
     convert_audio(audio, filename)
     async with self.lock:
       proc = await asyncio.create_subprocess_exec(
-          "./main",
+          "./whisper-cli",
           "-m", f"{self.model_path}/ggml-{self.model}.bin",
           "-l", self.language,
           "-f", filename,
