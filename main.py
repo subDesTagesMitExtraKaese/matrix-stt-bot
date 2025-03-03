@@ -91,7 +91,7 @@ async def main():
     asr.load_model()
     while True:
         try:
-            await bot.run()
+            await bot.main()
         except (asyncio.exceptions.TimeoutError, aiohttp.ClientError) as e:
             print(f"Network issue: {e}")
             traceback.print_exc()
