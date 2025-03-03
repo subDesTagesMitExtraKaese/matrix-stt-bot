@@ -112,6 +112,26 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ftcaplan/matrix-stt-bot:large-q5_0
+          tags: ftcaplan/matrix-stt-bot:large-v3-q5_0
           build-args: |
-            "PRELOAD_MODEL=large-q5_0"
+            "PRELOAD_MODEL=large-v3-q5_0"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ftcaplan/matrix-stt-bot:large-v3-turbo
+          build-args: |
+            "PRELOAD_MODEL=large-v3-turbo"
+      -
+        name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64/v8
+          push: true
+          tags: ftcaplan/matrix-stt-bot:large-v3-turbo-q5_0
+          build-args: |
+            "PRELOAD_MODEL=large-v3-turbo-q5_0"

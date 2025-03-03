@@ -31,9 +31,10 @@ COPY --from=builder /build/main /app/
 VOLUME /data/
 
 ADD ./*.py /app/
+ADD ./whisper.cpp/models/download-ggml-model.sh /app/
 
 ARG PRELOAD_MODEL
 ENV PRELOAD_MODEL ${PRELOAD_MODEL}
-RUN if [ -n "$PRELOAD_MODEL" ]; then wget -nv "https://ggml.ggerganov.com/ggml-model-whisper-$PRELOAD_MODEL.bin"; fi
+RUN if [ -n "$PRELOAD_MODEL" ]; then /app/download-ggml-model.sh "$PRELOAD_MODEL" "/app"; fi
 
 CMD ["python3", "-u", "main.py"]
