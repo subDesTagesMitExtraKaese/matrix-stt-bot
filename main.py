@@ -4,6 +4,7 @@ import os
 import time
 import traceback
 import asyncio
+import aiohttp
 
 import simplematrixbotlib as botlib
 import nio

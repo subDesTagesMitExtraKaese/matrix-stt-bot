@@ -1,2 +1,3 @@
 simplematrixbotlib==2.12.3
+aiohttp==3.11.13
 ffmpeg-python
