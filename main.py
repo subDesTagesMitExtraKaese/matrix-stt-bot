@@ -2,6 +2,7 @@
 from urllib.parse import urlparse
 import os
 import time
+import traceback
 import asyncio
 
 import simplematrixbotlib as botlib
@@ -85,11 +86,22 @@ async def on_message(room, event):
         }
       })
 
+async def main():
+    asr.load_model()
+    while True:
+        try:
+            await bot.run()
+        except (asyncio.exceptions.TimeoutError, aiohttp.ClientError) as e:
+            print(f"Network issue: {e}")
+            traceback.print_exc()
+            print("Network issue, restarting...")
+            await asyncio.sleep(5)
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            traceback.print_exc()
+            print("Unexpected error, restarting...")
+            await asyncio.sleep(5)
+
 if __name__ == "__main__":
-  asr.load_model()
-  try:
-    bot.run()
-  except asyncio.exceptions.TimeoutError as e:
-    print(e)
-    print("Timeout, restarting...")
-    time.sleep(5)
+    asyncio.run(main())
+

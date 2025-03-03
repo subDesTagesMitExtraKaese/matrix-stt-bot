@@ -11,7 +11,7 @@ ADD whisper.cpp/ /app/
 RUN cmake -B build && cmake --build build --config Release
 
 # main image
-FROM python:3.12-slim-bullseye
+FROM python:3.13-slim-bullseye
 WORKDIR /app/
 
 # Install dependencies
