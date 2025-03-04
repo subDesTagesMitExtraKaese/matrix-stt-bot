@@ -30,7 +30,7 @@ if 'ALLOWLIST' in os.environ:
 
 bot = botlib.Bot(creds, config)
 
-asr = ASR(os.getenv('ASR_MODEL', os.getenv('PRELOAD_MODEL', 'tiny')), os.getenv('ASR_LANGUAGE', 'en'))
+asr = ASR(os.getenv('ASR_MODEL', 'tiny'), os.getenv('ASR_LANGUAGE', 'en'))
 
 @bot.listener.on_custom_event(nio.RoomMessage)
 async def on_message(room, event):

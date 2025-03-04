@@ -62,11 +62,6 @@ MODELS = [
 
 class ASR():
   def __init__(self, model = "tiny", language = "en"):
-    if model not in MODELS:
-      raise ValueError(f"Invalid model: {model}. Must be one of {MODELS}")
-    self.model = model
-    self.language = language
-
     if os.path.exists(f"/app/ggml-{model}.bin"):
       self.model_path = f"/app"
     else:
@@ -74,11 +69,17 @@ class ASR():
       if not os.path.exists(self.model_path):
         os.mkdir(self.model_path)
 
+    file_path = f"{self.model_path}/ggml-{model}.bin"
+    if not os.path.exists(file_path) and model not in MODELS:
+      raise ValueError(f"Invalid model: {model}. Must be one of {MODELS}")
+
+    self.model = model
+    self.language = language
+    self.file_path = file_path
     self.lock = asyncio.Lock()
 
   def load_model(self):
-    file_path = f"{self.model_path}/ggml-{self.model}.bin"
-    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+    if not os.path.exists(self.file_path) or os.path.getsize(self.file_path) == 0:
       print("Downloading model...")
       subprocess.run(["./download-ggml-model.sh", self.model, self.model_path], check=True)
       print("Done.")

@@ -27,14 +27,16 @@ services:
 ```
 
 ## Configuration
-The bot will download the model file on first run to reduce image size. Available models are `tiny.en`, `tiny`, `base.en`, `base`, `small.en`, `small`, `medium.en`, `medium`, and `large`. The default is `ASR_MODEL=tiny`.
 
-You can authenticate using tokens instead of a password by setting `LOGIN_TOKEN=<login-token>` or `ACCESS_TOKEN=<access-token>` instead of `PASSWORD=<password>`.
+- **ASR_MODEL**: You can choose a model by setting it with `ASR_MODEL`. 
+  
+  - Available models are for example `tiny.en`, `tiny`, `base`, `small`, `medium`, and `large-v3`. The full list is available on [Hugging Face](https://huggingface.co/ggerganov/whisper.cpp). 
+  
+  - The default is `ASR_MODEL=tiny`. The bot will download the model file on first run to reduce image size.
 
-- **ASR_MODEL**: You can choose a docker tag with the corresponding model pre downloaded or set it with `ASR_MODEL`. Available models are `tiny.en`, `tiny`, `base.en`, `base`, `small.en`, `small`, `medium.en`, `medium`, and `large`. The default is `ASR_MODEL=tiny`.
+  - You can load your own ggml models by providing them at the following path: `/data/models/ggml-$ASR_MODEL.bin`
 
-- **Authentication**:
-  - You can authenticate using tokens instead of a password:
+- **Authentication**: You can authenticate using tokens instead of a password:
     - Set `LOGIN_TOKEN=<login-token>` or `ACCESS_TOKEN=<access-token>` instead of `PASSWORD=<password>`.
 
 - **Allowlist**:
