@@ -1,40 +1,37 @@
 # build image
-FROM ubuntu:22.04 AS builder
+FROM python:3.13-slim-bookworm AS builder
 WORKDIR /app/
 
-RUN apt-get update && \
-  apt-get install -y build-essential wget cmake git \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+RUN apt-get update \
+ && apt-get install -y \
+    build-essential wget cmake git \
+    libolm-dev gcc g++ make libffi-dev
 
 # Install Whisper.cpp
-ADD whisper.cpp/ /app/
+ADD whisper.cpp/ .
 RUN cmake -B build && cmake --build build --config Release
 
+# Install dependencies
+ADD requirements.txt .
+RUN pip install --prefix="/python-libs" --no-warn-script-location -r requirements.txt
+
 # main image
-FROM python:3.13-slim-bullseye
+FROM python:3.13-slim-bookworm
 WORKDIR /app/
 
-# Install dependencies
+COPY --from=builder /python-libs /usr/local
+COPY --from=builder /usr/local/lib/libolm* /usr/local/lib/
+COPY --from=builder /app/build/bin/whisper-cli /app/build/src/libwhisper* /app/build/ggml/src/libggml* /app/
+
 RUN apt-get update && apt-get install -y \
-    ffmpeg libolm-dev gcc make wget\
+    ffmpeg wget \
  && apt-get clean \
- && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
-
-ADD requirements.txt .
-
-RUN pip install -r requirements.txt && \
-  apt-get remove -y gcc make && \
-  apt-get autoremove -y
-
-COPY --from=builder /app/build/bin/whisper-cli /app/
+ && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
+ && ./whisper-cli --help > /dev/null
 
 VOLUME /data/
 
 ADD ./*.py /app/
 ADD ./whisper.cpp/models/download-ggml-model.sh /app/
-
-ARG PRELOAD_MODEL
-ENV PRELOAD_MODEL ${PRELOAD_MODEL}
-RUN if [ -n "$PRELOAD_MODEL" ]; then /app/download-ggml-model.sh "$PRELOAD_MODEL" "/app"; fi
 
 CMD ["python3", "-u", "main.py"]
