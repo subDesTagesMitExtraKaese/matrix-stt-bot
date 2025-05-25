@@ -1,4 +1,4 @@
 simplematrixbotlib==2.12.3
-aiohttp==3.11.18
+aiohttp==3.12.0
 matrix-nio[e2e]==0.24.0
 ffmpeg-python==0.2.0
