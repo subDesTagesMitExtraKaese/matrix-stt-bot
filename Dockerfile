@@ -1,5 +1,5 @@
 # build image
-FROM ubuntu:24.04 AS builder
+FROM ubuntu:22.04 AS builder
 WORKDIR /app/
 
 RUN apt-get update \
