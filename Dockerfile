@@ -1,16 +1,4 @@
-# build image
-FROM ubuntu:22.04 AS builder
-WORKDIR /app/
-
-RUN apt-get update \
- && apt-get install -y \
-    build-essential wget cmake git
-
-# Install Whisper.cpp
-ADD whisper.cpp/ .
-RUN cmake -B build && cmake --build build --config Release
-
-FROM python:3.13-slim-bookworm AS py-builder
+FROM python:3.13-slim-bookworm AS builder
 WORKDIR /app/
 
 RUN apt-get update \
@@ -31,11 +19,8 @@ ffmpeg wget \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-COPY --from=py-builder /python-libs /usr/local
-COPY --from=py-builder /usr/local/lib/libolm* /usr/local/lib/
-COPY --from=builder /app/build/bin/whisper-cli /app/build/src/libwhisper* /app/build/ggml/src/libggml* /app/
-
-RUN ./whisper-cli --help > /dev/null
+COPY --from=builder /python-libs /usr/local
+COPY --from=builder /usr/local/lib/libolm* /usr/local/lib/
 
 VOLUME /data/
 
