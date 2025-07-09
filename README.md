@@ -24,6 +24,10 @@ services:
       - "PASSWORD=<password>"
       - "ASR_MODEL=tiny"
       - "ASR_LANGUAGE=en"
+    
+    # optional: pass rendering device to container to enable Vulkan support
+    devices:
+      - /dev/dri
 ```
 
 ## Configuration
