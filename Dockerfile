@@ -1,36 +1,28 @@
 # build image
-FROM ubuntu:22.04 AS builder
+FROM ubuntu:24.04 AS builder
 WORKDIR /app/
-
 RUN apt-get update \
- && apt-get install -y \
+ && apt-get install -y --no-install-recommends \
     build-essential wget cmake git \
-    libvulkan-dev \
- && wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc \
-      | tee /etc/apt/trusted.gpg.d/lunarg.asc \
- && wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list \
-      https://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list \
- && apt-get update \
- && apt-get install -y vulkan-sdk
+    libvulkan-dev glslc \
+    libolm-dev gcc g++ make libffi-dev \
+    python3 python3-pip python3-venv \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Whisper.cpp
-ADD whisper.cpp/ .
+COPY whisper.cpp/ .
 RUN cmake -B build -DGGML_VULKAN=1 && cmake --build build --config Release
 
-FROM python:3.13-slim-bookworm AS py-builder
-WORKDIR /app/
-
-RUN apt-get update \
- && apt-get install -y \
-    build-essential wget cmake git \
-    libolm-dev gcc g++ make libffi-dev
+# Set Python path
+ENV PATH="/usr/bin:$PATH"
 
 # Install dependencies
-ADD requirements.txt .
-RUN pip install --prefix="/python-libs" --no-warn-script-location -r requirements.txt
+COPY requirements.txt .
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # main image
-FROM python:3.13-slim-bookworm
+FROM ubuntu:24.04
 WORKDIR /app/
 
 RUN apt-get update && apt-get install -y \
@@ -38,19 +30,20 @@ ffmpeg wget \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-COPY --from=py-builder /python-libs /usr/local
-COPY --from=py-builder /usr/local/lib/libolm* /usr/local/lib/
-COPY --from=builder /app/build/bin/whisper-cli \
-     /app/build/src/libwhisper* \
-     /app/build/ggml/src/libggml* \
-     /app/build/ggml/src/ggml-vulkan/libggml* \
-     /app/
+# Copy Python venv and set up environment
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
+COPY --from=builder /app/build/bin/whisper-cli /app/
+COPY --from=builder /app/build/src/libwhisper* /app/
+COPY --from=builder /app/build/ggml/src/libggml* /app/
+COPY --from=builder /app/build/ggml/src/ggml-vulkan/libggml* /app/
+     
 RUN ./whisper-cli --help > /dev/null
 
 VOLUME /data/
 
-ADD ./*.py /app/
-ADD ./whisper.cpp/models/download-ggml-model.sh /app/
+COPY ./*.py /app/
+COPY ./whisper.cpp/models/download-ggml-model.sh /app/
 
 CMD ["python3", "-u", "main.py"]
