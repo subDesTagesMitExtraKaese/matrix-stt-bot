@@ -2,16 +2,18 @@
 FROM ubuntu:24.04 AS builder
 WORKDIR /app/
 RUN apt-get update \
- && apt-get install -y --no-install-recommends \
+ && apt-get install -y \
     build-essential wget cmake git \
     libvulkan-dev glslc \
+    libavcodec-dev libavformat-dev libavutil-dev \
     libolm-dev gcc g++ make libffi-dev \
     python3 python3-pip python3-venv \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 # Install Whisper.cpp
 COPY whisper.cpp/ .
-RUN cmake -B build -DGGML_VULKAN=1 && cmake --build build --config Release
+RUN cmake -B build -DGGML_VULKAN=1 -D WHISPER_FFMPEG=yes && \
+    cmake --build build --config Release
 
 # Set Python path
 ENV PATH="/usr/bin:$PATH"
@@ -26,9 +28,9 @@ FROM ubuntu:24.04
 WORKDIR /app/
 
 RUN apt-get update && apt-get install -y \
-ffmpeg wget \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+    wget libvulkan1 libavcodec60 libavformat60 libavutil58 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Copy Python venv and set up environment
 COPY --from=builder /opt/venv /opt/venv

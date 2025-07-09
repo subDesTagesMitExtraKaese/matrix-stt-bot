@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 import os
 import time
 import traceback
+import tempfile
 import asyncio
 import aiohttp
 
@@ -61,15 +62,21 @@ async def on_message(room, event):
     else:
       data = response.body
 
-    result = await asr.transcribe(data) if data else None
-
+    filename = response.filename or event.body
+    if data:
+      with tempfile.NamedTemporaryFile("w+b", suffix=filename) as file:
+        file.write(data)
+        file.flush()
+        result = await asr.transcribe(file.name)
+    else:
+      result = None
+    
     await bot.async_client.room_typing(room.machine_name, False)
 
     if not result:
       print("No result")
       return
 
-    filename = response.filename or event.body
     if filename:
       reply = f"Transcription of {filename}: {result}"
     else:
