@@ -2,3 +2,4 @@ simplematrixbotlib @ git+https://codeberg.org/subDesTagesMitExtraKaese/simplemat
 aiohttp==3.12.13
 matrix-nio[e2e]==0.25.2
 ffmpeg-python==0.2.0
+pywhispercpp @ git+https://github.com/absadiki/pywhispercpp@v1.3.1

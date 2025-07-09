@@ -61,9 +61,10 @@ async def on_message(room, event):
     else:
       data = response.body
 
-    result = await asr.transcribe(data) if data else None
-
-    await bot.async_client.room_typing(room.machine_name, False)
+    try:
+      result = await asr.transcribe(data) if data else None
+    finally:
+      await bot.async_client.room_typing(room.machine_name, False)
 
     if not result:
       print("No result")
