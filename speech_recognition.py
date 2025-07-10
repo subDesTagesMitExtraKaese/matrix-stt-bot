@@ -61,7 +61,7 @@ class ASR():
 
   async def transcribe(self, file: str) -> str:
     async with self.lock:
-      print(f"transcriibing {file}...")
+      print(f"Transcribing {file}...")
       proc = await asyncio.create_subprocess_exec(
           "./whisper-cli",
           "-m", f"{self.model_path}/ggml-{self.model}.bin",
