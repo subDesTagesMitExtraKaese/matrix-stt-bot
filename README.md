@@ -2,7 +2,7 @@
 
 Transcribes audio messages using [OpenAI Whisper](https://github.com/openai/whisper).
 
-This bot is based on [Simple-Matrix-Bot-Lib](https://github.com/i10b/simplematrixbotlib) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp). It downloads audio messages from your homeserver, transcribes them locally and responds with the result as a text message.
+This bot is based on [Simple-Matrix-Bot-Lib](https://codeberg.org/imbev/simplematrixbotlib) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp). It downloads audio messages from your homeserver, transcribes them locally and responds with the result as a text message.
 
 ## Usage
 
