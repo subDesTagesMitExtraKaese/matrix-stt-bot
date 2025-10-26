@@ -28,8 +28,8 @@ RUN python3 -m venv /opt/venv && \
 FROM ubuntu:24.04
 WORKDIR /app/
 
-RUN apt-get update && apt-get install -y \
-    wget libopenblas0 libvulkan1 libavcodec60 libavformat60 libavutil58 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget libopenblas0 libvulkan1 libavcodec60 libavformat60 libavutil58 ca-certificates python3 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
