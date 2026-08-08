@@ -63,8 +63,16 @@ async def on_message(room, event):
       data = response.body
 
     filename = response.filename or event.body
+    if filename:
+        parsed_path = urlparse(filename).path
+        basename = os.path.basename(parsed_path)
+        _, ext = os.path.splitext(basename)
+        safe_suffix = ext if ext else ''
+    else:
+        safe_suffix = ''
+
     if data:
-      with tempfile.NamedTemporaryFile("w+b", suffix=filename) as file:
+      with tempfile.NamedTemporaryFile("w+b", suffix=safe_suffix) as file:
         file.write(data)
         file.flush()
         result = await asr.transcribe(file.name)
