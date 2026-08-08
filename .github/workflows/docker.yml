@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - 'master'
+    tags:
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -15,6 +18,17 @@ jobs:
         uses: actions/checkout@v6
         with:
           submodules: recursive
+      -
+        name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ftcaplan/matrix-stt-bot
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_event_tag}}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -34,4 +48,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ftcaplan/matrix-stt-bot:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
