@@ -19,7 +19,7 @@ It is built on top of [Simple‑Matrix‑Bot‑Lib](https://codeberg.org/imbev/s
 ---
 ## Usage
 
-The matrix bot is published as a ready‑to‑run Docker image on [DockerHub](https://hub.docker.com/r/ftcaplan/matrix-stt-bot).
+The matrix bot is published as a ready‑to‑run Docker image on [DockerHub](https://hub.docker.com/r/ftcaplan/matrix-stt-bot) and [GHCR](https://github.com/subDesTagesMitExtraKaese/matrix-stt-bot/pkgs/container/matrix-stt-bot).
 
 You can deploy it using `docker-compose`:
 
