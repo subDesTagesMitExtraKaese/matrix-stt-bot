@@ -17,11 +17,22 @@ jobs:
         with:
           submodules: recursive
       -
-        name: Docker metadata
-        id: meta
+        name: Docker metadata (DockerHub)
+        id: meta-dockerhub
         uses: docker/metadata-action@v5
         with:
           images: ftcaplan/matrix-stt-bot
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
+      -
+        name: Docker metadata (GHCR)
+        id: meta-ghcr
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/subdestagesmitextrakaese/matrix-stt-bot
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
@@ -40,11 +51,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      -
         name: Build and push
         uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ steps.meta-dockerhub.outputs.tags }}
+            ${{ steps.meta-ghcr.outputs.tags }}
+          labels: |
+            ${{ steps.meta-dockerhub.outputs.labels }}
+            ${{ steps.meta-ghcr.outputs.labels }}
