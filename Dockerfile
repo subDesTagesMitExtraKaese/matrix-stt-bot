@@ -1,5 +1,5 @@
 # build image
-FROM debian:trixie AS builder
+FROM debian:13-slim AS builder
 WORKDIR /app/
 RUN apt-get update \
  && apt-get install -y \
@@ -16,35 +16,30 @@ COPY whisper.cpp/ .
 RUN cmake -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS -DGGML_VULKAN=ON -DWHISPER_COMMON_FFMPEG=ON && \
     cmake --build build --config Release
 
-# Set Python path
-ENV PATH="/usr/bin:$PATH"
-
-# Install dependencies
+# Install Python dependencies
 COPY requirements.txt .
 RUN python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # main image
-FROM debian:trixie
+FROM debian:13-slim
 WORKDIR /app/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget libopenblas0 libgomp1 libvulkan1 libavcodec-dev libavformat-dev libavutil-dev libswresample-dev ca-certificates python3 \
+    wget libopenblas0 libgomp1 libvulkan1 \
+    libavcodec61 libavformat61 libavutil59 libswresample5 \
+    ca-certificates python3 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
-# Copy Python venv and set up environment
+# Copy Python venv and built binaries
 COPY --from=builder /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+COPY --from=builder /app/build/bin/whisper-cli .
+COPY --from=builder /app/build/bin/libwhisper.so* .
+COPY --from=builder /app/build/bin/libggml*.so* .
+COPY --from=builder /app/build/bin/libparakeet.so* .
 
-COPY --from=builder /app/build/bin/whisper-cli /app/
-COPY --from=builder /app/build/bin/libwhisper.so* /app/
-COPY --from=builder /app/build/bin/libggml.so* /app/
-COPY --from=builder /app/build/bin/libggml-base.so* /app/
-COPY --from=builder /app/build/bin/libggml-cpu.so* /app/
-COPY --from=builder /app/build/bin/libggml-blas.so* /app/
-COPY --from=builder /app/build/bin/libggml-vulkan.so* /app/
-COPY --from=builder /app/build/bin/libparakeet.so* /app/
+ENV PATH="/opt/venv/bin:$PATH"
      
 RUN ./whisper-cli --help > /dev/null
 
