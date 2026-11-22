@@ -16,10 +16,12 @@ COPY whisper.cpp/ .
 RUN cmake -B build -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS -DGGML_VULKAN=ON -DWHISPER_COMMON_FFMPEG=ON && \
     cmake --build build --config Release
 
-# Install Python dependencies
-COPY requirements.txt .
+# Install the Python package
+COPY pyproject.toml README.md LICENSE ./
+COPY matrix_stt_bot/ ./matrix_stt_bot/
 RUN python3 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+    /opt/venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/venv/bin/pip install --no-cache-dir .
 
 # main image
 FROM debian:13-slim
@@ -45,7 +47,8 @@ RUN ./whisper-cli --help > /dev/null
 
 VOLUME /data/
 
-COPY ./*.py /app/
 COPY ./whisper.cpp/models/download-ggml-model.sh /app/
 
-CMD ["python3", "-u", "main.py"]
+ENV PYTHONUNBUFFERED=1
+
+CMD ["matrix-stt-bot"]

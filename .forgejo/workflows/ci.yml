@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+        run: pip install --no-cache-dir '.[dev]'
       - name: Run unit tests
         run: pytest -q
 

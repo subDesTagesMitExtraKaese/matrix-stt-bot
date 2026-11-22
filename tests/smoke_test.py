@@ -10,6 +10,7 @@ import asyncio
 import glob
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -18,8 +19,6 @@ APP = Path("/app")
 SAMPLES = Path(os.environ.get("SMOKE_SAMPLES", "/samples"))
 MODEL = os.environ.get("SMOKE_MODEL", "tiny")
 MODEL_DIR = os.environ.get("SMOKE_MODEL_DIR", "/tmp/models")
-
-sys.path.insert(0, str(APP))
 
 
 def check(condition, message):
@@ -53,6 +52,8 @@ def check_python_imports():
     result = run(sys.executable, "-c", "import aiohttp, nio, simplematrixbotlib", cwd=APP)
     check(result.returncode == 0, f"python imports failed: {result.stderr}")
 
+    check(shutil.which("matrix-stt-bot"), "matrix-stt-bot entry point missing")
+
     env = {
         **os.environ,
         "HOMESERVER": "https://matrix.invalid",
@@ -61,12 +62,18 @@ def check_python_imports():
         "ASR_MODEL": MODEL,
         "ASR_LANGUAGE": "en",
     }
-    result = run(sys.executable, "-c", "import main", cwd=APP, env=env)
-    check(result.returncode == 0, f"importing main failed: {result.stderr}")
+    result = run(
+        sys.executable,
+        "-c",
+        "from matrix_stt_bot.app import create_bot; create_bot()",
+        cwd=APP,
+        env=env,
+    )
+    check(result.returncode == 0, f"creating the bot failed: {result.stderr}")
 
 
 def check_transcription():
-    from speech_recognition import ASR
+    from matrix_stt_bot.asr import ASR
 
     asr = ASR(MODEL, "en", MODEL_DIR)
     asr.load_model()

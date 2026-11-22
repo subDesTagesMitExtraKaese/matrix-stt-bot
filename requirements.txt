@@ -1,3 +1,0 @@
-simplematrixbotlib==2.13.1
-aiohttp==3.14.3
-matrix-nio[e2e]==0.26.0

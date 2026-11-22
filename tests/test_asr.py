@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from speech_recognition import ASR
+from matrix_stt_bot.asr import ASR
 
 MODEL = os.getenv("TEST_MODEL", "tiny")
 

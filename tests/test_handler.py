@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import nio
 import pytest
 
-from handler import file_suffix, is_media_event, transcribe_event
+from matrix_stt_bot.handler import file_suffix, is_media_event, transcribe_event
 
 
 class FakeAsyncClient:

@@ -44,12 +44,21 @@ services:
 
 ## Development
 
+The project is packaged with `pyproject.toml`. Install it in editable mode with the
+development dependencies:
+
+```sh
+pip install -e '.[dev]'
+```
+
+This also installs the `matrix-stt-bot` entry point, so the bot can be started with
+`matrix-stt-bot` or `python -m matrix_stt_bot`.
+
 ### Tests
 
 The unit tests (message handling, model validation) need only the Python dependencies:
 
 ```sh
-pip install -r requirements.txt -r requirements-dev.txt
 pytest -q
 ```
 
