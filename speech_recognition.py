@@ -37,13 +37,12 @@ MODELS = [
 
 
 class ASR:
-    def __init__(self, model="tiny", language="en"):
+    def __init__(self, model="tiny", language="en", model_dir="/data/models"):
         if os.path.exists(f"/app/ggml-{model}.bin"):
-            self.model_path = f"/app"
+            self.model_path = "/app"
         else:
-            self.model_path = f"/data/models"
-            if not os.path.exists(self.model_path):
-                os.mkdir(self.model_path)
+            self.model_path = model_dir
+            os.makedirs(self.model_path, exist_ok=True)
 
         file_path = f"{self.model_path}/ggml-{model}.bin"
         if not os.path.exists(file_path) and model not in MODELS:

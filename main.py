@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-from urllib.parse import urlparse
 import os
 import traceback
-import tempfile
 import asyncio
 import aiohttp
 
 import simplematrixbotlib as botlib
 import nio
 
+from handler import is_media_event, transcribe_event
 from speech_recognition import ASR
 
 creds = botlib.Creds(
@@ -35,74 +34,29 @@ asr = ASR(os.getenv("ASR_MODEL", "tiny"), os.getenv("ASR_LANGUAGE", "en"))
 
 @bot.listener.on_custom_event(nio.RoomMessage)
 async def on_message(room, event):
-    if not isinstance(
-        event,
-        (
-            nio.RoomMessageAudio,
-            nio.RoomEncryptedAudio,
-            nio.RoomMessageVideo,
-            nio.RoomEncryptedVideo,
-        ),
-    ):
+    if not is_media_event(event):
         return
-
-    encrypted = isinstance(event, (nio.RoomEncryptedAudio, nio.RoomEncryptedVideo))
 
     print(room.machine_name, event.sender, event.body, event.url)
     match = botlib.MessageMatch(room, event, bot)
-    if match.is_not_from_this_bot():
-        await bot.async_client.room_typing(room.machine_name, True, timeout=120000)
-        response = await bot.async_client.download(mxc=event.url)
-        if isinstance(response, nio.responses.DownloadError):
-            print(response)
-            data = None
-        elif encrypted:
-            print("decrypting...")
-            data = nio.crypto.attachments.decrypt_attachment(
-                response.body,
-                event.source["content"]["file"]["key"]["k"],
-                event.source["content"]["file"]["hashes"]["sha256"],
-                event.source["content"]["file"]["iv"],
-            )
-        else:
-            data = response.body
+    if not match.is_not_from_this_bot():
+        return
 
-        filename = response.filename or event.body
-        if filename:
-            parsed_path = urlparse(filename).path
-            basename = os.path.basename(parsed_path)
-            _, ext = os.path.splitext(basename)
-            safe_suffix = ext if ext else ""
-        else:
-            safe_suffix = ""
+    await bot.async_client.room_typing(room.machine_name, True, timeout=120000)
+    reply = await transcribe_event(bot, event, asr)
+    await bot.async_client.room_typing(room.machine_name, False)
 
-        if data:
-            with tempfile.NamedTemporaryFile("w+b", suffix=safe_suffix) as file:
-                file.write(data)
-                file.flush()
-                result = await asr.transcribe(file.name)
-        else:
-            result = None
+    if not reply:
+        return
 
-        await bot.async_client.room_typing(room.machine_name, False)
-
-        if not result:
-            print("No result")
-            return
-
-        if filename:
-            reply = f"Transcription of {filename}: {result}"
-        else:
-            reply = f"Transcription: {result}"
-
-        await bot.api._send_room(
-            room_id=room.room_id,
-            content={
-                "msgtype": "m.notice",
-                "body": reply,
-                "m.relates_to": {"m.in_reply_to": {"event_id": event.event_id}},
-            },
-        )
+    await bot.api._send_room(
+        room_id=room.room_id,
+        content={
+            "msgtype": "m.notice",
+            "body": reply,
+            "m.relates_to": {"m.in_reply_to": {"event_id": event.event_id}},
+        },
+    )
 
 
 async def main():

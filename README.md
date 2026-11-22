@@ -42,6 +42,39 @@ services:
       - /dev/dri
 ```
 
+## Development
+
+### Tests
+
+The unit tests (message handling, model validation) need only the Python dependencies:
+
+```sh
+pip install -r requirements.txt -r requirements-dev.txt
+pytest -q
+```
+
+The integration smoke test checks the built image: whisper.cpp runs, all shared
+libraries resolve, the Python modules import, and a WAV and an MP3 are transcribed
+with the real `ASR` class. It runs inside the image, so no test dependencies are
+baked into it:
+
+```sh
+docker build -t matrix-stt-bot:ci .
+docker run --rm \
+  -v "$PWD/tests:/tests:ro" \
+  -v "$PWD/whisper.cpp/samples:/samples:ro" \
+  matrix-stt-bot:ci python3 /tests/smoke_test.py
+```
+
+### CI
+
+`.forgejo/workflows/ci.yml` runs the unit tests and builds the image, then runs the
+smoke test against it. The `image` job needs a runner with access to the Docker
+daemon; adjust `runs-on` to the label used by your Forgejo runner.
+
+GitHub Actions (`.github/workflows/docker.yml`) is only used for publishing tagged
+releases to DockerHub and GHCR.
+
 ## Configuration
 
 ### ASR Model

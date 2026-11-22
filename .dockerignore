@@ -2,3 +2,6 @@ __pycache__/
 data/
 docker-compose.yml
 .env
+.venv*/
+.pytest_cache/
+.forgejo/

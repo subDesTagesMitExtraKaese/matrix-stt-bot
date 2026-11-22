@@ -2,3 +2,7 @@ data/
 docker-compose.yml
 .env
 *.pyc
+
+.venv-local/
+.pytest_cache/
+**/__pycache__/

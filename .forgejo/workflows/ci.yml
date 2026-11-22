@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: docker
+    container:
+      image: python:3.13-slim
+    steps:
+      - name: Install git
+        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+      - name: Run unit tests
+        run: pytest -q
+
+  image:
+    runs-on: docker
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build image
+        run: docker build -t matrix-stt-bot:ci .
+      - name: Smoke test image
+        run: |
+          docker run --rm \
+            -v "$PWD/tests:/tests:ro" \
+            -v "$PWD/whisper.cpp/samples:/samples:ro" \
+            matrix-stt-bot:ci python3 /tests/smoke_test.py
