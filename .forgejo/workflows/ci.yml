@@ -14,21 +14,19 @@ concurrency:
 jobs:
   tests:
     runs-on: docker
-    container:
-      image: python:3.13-slim
     steps:
-      - name: Install git
-        run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Install dependencies
-        run: pip install --no-cache-dir '.[dev]'
       - name: Run unit tests
-        run: pytest -q
+        run: |
+          docker run --rm \
+            -v "$PWD:/src" \
+            -w /src \
+            python:3.13-slim \
+            sh -c "pip install --no-cache-dir '.[dev]' && pytest -q -p no:cacheprovider"
 
   image:
     runs-on: docker
-    timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v7
