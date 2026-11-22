@@ -19,11 +19,8 @@ jobs:
         uses: actions/checkout@v7
       - name: Run unit tests
         run: |
-          docker run --rm \
-            -v "$PWD:/src" \
-            -w /src \
-            python:3.13-slim \
-            sh -c "pip install --no-cache-dir '.[dev]' && pytest -q -p no:cacheprovider"
+          docker build -f Dockerfile.test -t matrix-stt-bot:test .
+          docker run --rm matrix-stt-bot:test
 
   image:
     runs-on: docker

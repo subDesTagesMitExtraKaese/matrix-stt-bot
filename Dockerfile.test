@@ -1,0 +1,12 @@
+# Unit test image, used by CI so the tests need no bind mounts
+FROM python:3.13-slim
+
+WORKDIR /src
+
+COPY pyproject.toml README.md LICENSE ./
+COPY matrix_stt_bot/ ./matrix_stt_bot/
+COPY tests/ ./tests/
+
+RUN pip install --no-cache-dir '.[dev]'
+
+CMD ["pytest", "-q"]
