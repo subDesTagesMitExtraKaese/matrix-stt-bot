@@ -20,7 +20,7 @@ jobs:
       - name: Install git
         run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install dependencies
         run: pip install --no-cache-dir '.[dev]'
       - name: Run unit tests
@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 120
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Build image

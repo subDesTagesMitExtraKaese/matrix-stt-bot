@@ -19,7 +19,7 @@ jobs:
       -
         name: Docker metadata (DockerHub)
         id: meta-dockerhub
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ftcaplan/matrix-stt-bot
           tags: |
@@ -30,7 +30,7 @@ jobs:
       -
         name: Docker metadata (GHCR)
         id: meta-ghcr
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/subdestagesmitextrakaese/matrix-stt-bot
           tags: |
